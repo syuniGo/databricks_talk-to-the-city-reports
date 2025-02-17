@@ -3,15 +3,14 @@ import json
 from tqdm import tqdm
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, update_progress
+from utils import messages, update_progress, get_openai_chat_client
 import concurrent.futures
-
+   
 
 def extraction(config):
     dataset = config['output_dir']
     path = f"outputs/{dataset}/args.csv"
     comments = pd.read_csv(f"inputs/{config['input']}.csv")
-
     model = config['extraction']['model']
     prompt = config['extraction']['prompt']
     workers = config['extraction']['workers']
@@ -44,8 +43,20 @@ def extract_batch(batch, prompt, model, workers):
 
 
 def extract_arguments(input, prompt, model, retries=3):
-    llm = ChatOpenAI(model_name=model, temperature=0.0)
-    response = llm(messages=messages(prompt, input)).content.strip()
+    # llm = ChatOpenAI(model_name=model, temperature=0.0)
+    # endpoint = os.getenv("endpoint")
+    # credential = os.getenv("credential")
+    # model_name = model["name"]
+    # api_version = model["api_version"]
+    # print('---endpoint---', endpoint)
+    # print('---credential---', credential)
+    # print('---model_name---', model_name)
+    # print('---api_version---', api_version)
+    # print('---prompt---', prompt)
+    # print('---messages(prompt, input)---', messages(prompt, input))
+    # print('---messages(prompt, input)--type-', type(messages(prompt, input)))
+    llm = get_openai_chat_client(model)
+    response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
     try:
         obj = json.loads(response)
         # LLM sometimes returns valid JSON string
@@ -64,3 +75,17 @@ def extract_arguments(input, prompt, model, retries=3):
         else:
             print("Silently giving up on trying to generate valid list.")
             return []
+def get_azure_client1(model):
+    endpoint = os.getenv("endpoint")
+    credential = os.getenv("credential")
+    model_name = model["name"]
+    api_version = model["api_version"]
+    if not all([endpoint, credential]):
+        raise ValueError("Missing required environment variables: endpoint or credential")
+    print(f"Using endpoint {endpoint} and credential {credential}")
+    print(f"Using model {model_name} with api version {api_version}")
+    return ChatCompletionsClient(
+        endpoint=f"{endpoint}/models/deployments/{model_name}",
+        credential=AzureKeyCredential(credential),
+        api_version=api_version,
+    )

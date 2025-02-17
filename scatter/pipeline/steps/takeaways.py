@@ -6,8 +6,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, update_progress
-
+from utils import messages, update_progress, get_openai_chat_client
 
 def takeaways(config):
     dataset = config['output_dir']
@@ -43,7 +42,9 @@ def takeaways(config):
 
 
 def generate_takeaways(args_sample, prompt, model):
-    llm = ChatOpenAI(model_name=model, temperature=0.0)
+    #llm = ChatOpenAI(model_name=model, temperature=0.0)
     input = "\n".join(args_sample)
-    response = llm(messages=messages(prompt, input)).content.strip()
+    llm = get_openai_chat_client(model)
+    response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
+    print("---response---", response)
     return response

@@ -12,6 +12,8 @@ def clustering(config):
     arguments_array = arguments_df["argument"].values
 
     embeddings_df = pd.read_pickle(f"outputs/{dataset}/embeddings.pkl")
+    print(embeddings_df.shape)
+    print(print(embeddings_df.head()) )
     embeddings_array = np.asarray(embeddings_df["embedding"].values.tolist())
     clusters = config['clustering']['clusters']
 

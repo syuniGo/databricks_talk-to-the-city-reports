@@ -3,7 +3,6 @@
 from tqdm import tqdm
 from typing import List
 import pandas as pd
-from langchain.chat_models import ChatOpenAI
 import json
 
 
