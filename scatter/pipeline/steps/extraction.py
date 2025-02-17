@@ -3,7 +3,7 @@ import json
 from tqdm import tqdm
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, update_progress, get_openai_chat_client
+from utils import messages, update_progress, get_openai_chat_client, get_azure_chat_client
 import concurrent.futures
    
 
@@ -55,16 +55,28 @@ def extract_arguments(input, prompt, model, retries=3):
     # print('---prompt---', prompt)
     # print('---messages(prompt, input)---', messages(prompt, input))
     # print('---messages(prompt, input)--type-', type(messages(prompt, input)))
-    llm = get_openai_chat_client(model)
+    llm = get_azure_chat_client(model)
     response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
     try:
-        obj = json.loads(response)
-        # LLM sometimes returns valid JSON string
-        if isinstance(obj, str):
-            obj = [obj]
-        items = [a.strip() for a in obj]
-        items = filter(None, items)  # omit empty strings
-        return items
+        if '[' in response and ']' in response:
+            start_idx = response.rindex('[')
+            end_idx = response.rindex(']')
+            json_str = response[start_idx:end_idx+1]
+                
+            obj = json.loads(json_str)
+            # LLM sometimes returns valid JSON string
+            if isinstance(obj, str):
+                obj = [obj]
+            items = [a.strip() for a in obj]
+            items = filter(None, items)  # omit empty strings
+            return items
+        else:
+            print("No JSON array found in response")
+            if retries > 0:
+                print("Retrying...")
+                return extract_arguments(input, prompt, model, retries - 1)
+            else:
+                return []
     except json.decoder.JSONDecodeError as e:
         print("JSON error:", e)
         print("Input was:", input)
@@ -75,17 +87,3 @@ def extract_arguments(input, prompt, model, retries=3):
         else:
             print("Silently giving up on trying to generate valid list.")
             return []
-def get_azure_client1(model):
-    endpoint = os.getenv("endpoint")
-    credential = os.getenv("credential")
-    model_name = model["name"]
-    api_version = model["api_version"]
-    if not all([endpoint, credential]):
-        raise ValueError("Missing required environment variables: endpoint or credential")
-    print(f"Using endpoint {endpoint} and credential {credential}")
-    print(f"Using model {model_name} with api version {api_version}")
-    return ChatCompletionsClient(
-        endpoint=f"{endpoint}/models/deployments/{model_name}",
-        credential=AzureKeyCredential(credential),
-        api_version=api_version,
-    )

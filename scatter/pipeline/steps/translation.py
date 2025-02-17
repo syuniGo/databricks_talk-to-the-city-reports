@@ -3,7 +3,7 @@ import json
 from tqdm import tqdm
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, get_openai_chat_client
+from utils import messages, get_openai_chat_client, get_azure_chat_client
 from langchain.schema import AIMessage
 import pandas as pd
 import json
@@ -93,7 +93,7 @@ def translate_batch(batch, lang_prompt, model, retries=3):
     #llm = ChatOpenAI(model_name=model, temperature=0.0)
     input = json.dumps(list(batch))
     #response = llm(messages=messages(lang_prompt, input)).content.strip()
-    llm = get_openai_chat_client(model)
+    llm = get_azure_chat_client(model)
     response = llm.complete(messages=messages(lang_prompt, input)).choices[0].message.content.strip()
     print("---response---", response)
 
