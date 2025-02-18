@@ -6,8 +6,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, update_progress
-
+from utils import messages, update_progress, get_openai_chat_client
 
 def overview(config):
     dataset = config['output_dir']
@@ -28,8 +27,11 @@ def overview(config):
         input += f"# Cluster {i}/{len(ids)}: {labels.loc[id]['label']}\n\n"
         input += takeaways.loc[id]['takeaways'] + '\n\n'
 
-    llm = ChatOpenAI(model_name=model, temperature=0.0)
-    response = llm(messages=messages(prompt, input)).content.strip()
+    # llm = ChatOpenAI(model_name=model, temperature=0.0)
+    # response = llm(messages=messages(prompt, input)).content.strip()
+    llm = get_openai_chat_client(model)
+    response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
+    print("---response---", response)
 
     with open(path, 'w') as file:
         file.write(response)
