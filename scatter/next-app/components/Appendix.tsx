@@ -36,7 +36,7 @@ const StepInfo = ({ conf, t, step, i }: { conf: any, t: any, step: string, i: nu
     {conf.prompt && <span>, <span
       className='underline mr-2 cursor-pointer'
       onClick={() => setShowPrompt(x => !x)}>
-      {showPrompt ? t("hide prompt") : t("show prompt")}</span>({conf.model})</span>}
+      {showPrompt ? t("hide prompt") : t("show prompt")}</span>({conf.model.name})</span>}
     <div>
       {showCode && <div className='my-4 border rounded p-4 bg-gray-50'>
         <pre className='text-xs'>
