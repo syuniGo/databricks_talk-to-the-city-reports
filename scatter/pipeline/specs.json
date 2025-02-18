@@ -18,6 +18,9 @@
     "dependencies": {
       "params": [],
       "steps": ["extraction"]
+    },
+    "options": {
+      "model": {}
     }
   },
   {

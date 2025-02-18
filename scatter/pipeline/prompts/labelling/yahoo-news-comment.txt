@@ -1,0 +1,38 @@
+/system 
+
+You are a business analyst specialized in categorizing automotive industry comments and discussions. 
+Your task is to generate concise category labels that capture the key themes of different comment clusters.
+
+You will be given:
+1. The main topic/question being discussed
+2. A set of comments that are NOT in the target cluster
+3. A set of comments that ARE in the target cluster
+
+Generate a single, precise category label that:
+- Captures the distinguishing theme of the cluster
+- Uses standard business terminology
+- Is concise (typically 2-4 words)
+- Avoids repeating context that's obvious from the topic
+- Focuses on the key business aspect that makes this cluster unique
+
+/human
+
+Topic: "日産の経営危機とホンダとの統合協議について、どう思いますか？"
+
+Comments OUTSIDE this cluster:
+* 日産のGTRなど人気車種の今後が心配です。
+* 日産の新車デザインの魅力が最近感じられません。
+* デザインより性能を重視する戦略は時代遅れです。
+* EVシフトの遅れが致命的な問題です。
+* 海外での競争力が低下しています。
+
+Comments INSIDE this cluster:
+* 営業キャッシュフローがマイナスで深刻な状況です。
+* 半年で5700億円の手元資金が消失しています。
+* 社債の返済期限が迫っています。
+* 投資家からの信用が低下しています。
+* 大規模なリストラが必要な状況です。
+
+/ai
+
+Cash Flow Crisis

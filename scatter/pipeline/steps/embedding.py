@@ -2,6 +2,7 @@
 from langchain.embeddings import OpenAIEmbeddings
 import pandas as pd
 from utils import get_embeddings_client
+from tqdm import tqdm 
 
 
 def embedding(config):

@@ -5,7 +5,7 @@ import pandas as pd
 from langchain.chat_models import ChatOpenAI
 from utils import messages, update_progress, get_openai_chat_client
 import concurrent.futures
-   
+from azure.core.exceptions import HttpResponseError 
 
 def extraction(config):
     dataset = config['output_dir']
@@ -53,28 +53,50 @@ def extract_arguments(input, prompt, model, retries=3):
     # print('---model_name---', model_name)
     # print('---api_version---', api_version)
     # print('---prompt---', prompt)
-    # print('---messages(prompt, input)---', messages(prompt, input))
-    # print('---messages(prompt, input)--type-', type(messages(prompt, input)))
-    llm = get_openai_chat_client(model)
-    response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
+    print('---messages(prompt, input)---', messages(prompt, input))
+    print('---messages(prompt, input)--type-', type(messages(prompt, input)))
     try:
-        obj = json.loads(response)
-        # LLM sometimes returns valid JSON string
-        if isinstance(obj, str):
-            obj = [obj]
-        items = [a.strip() for a in obj]
-        items = filter(None, items)  # omit empty strings
-        return items
-    except json.decoder.JSONDecodeError as e:
-        print("JSON error:", e)
-        print("Input was:", input)
-        print("Response was:", response)
+        llm = get_openai_chat_client(model)
+        response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
+        try:
+            obj = json.loads(response)
+            # LLM sometimes returns valid JSON string
+            if isinstance(obj, str):
+                obj = [obj]
+            items = [a.strip() for a in obj]
+            items = filter(None, items)  # omit empty strings
+            return items
+        except json.decoder.JSONDecodeError as e:
+            print("JSON error:", e)
+            print("Input was:", input)
+            print("Response was:", response)
+            if retries > 0:
+                print("Retrying...")
+                return extract_arguments(input, prompt, model, retries - 1)
+            else:
+                print("Silently giving up on trying to generate valid list.")
+                return []
+    except HttpResponseError as e:
+        if "content_filter" in str(e):
+            print(f"Content filter triggered, skipping this: {str(e)}")
+            return []  
+        else:
+            print(f"HTTP error occurred: {str(e)}")
+            if retries > 0:
+                print("Retrying due to HTTP error...")
+                return extract_arguments(input, prompt, model, retries - 1)
+            else:
+                print("Max retries reached for HTTP error.")
+                return []
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         if retries > 0:
             print("Retrying...")
             return extract_arguments(input, prompt, model, retries - 1)
         else:
-            print("Silently giving up on trying to generate valid list.")
+            print("Max retries reached.")
             return []
+        
 def get_azure_client1(model):
     endpoint = os.getenv("endpoint")
     credential = os.getenv("credential")
