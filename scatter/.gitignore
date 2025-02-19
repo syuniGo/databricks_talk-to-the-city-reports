@@ -11,7 +11,11 @@ pipeline/configs/*
 !pipeline/configs/example-polis.json
 !pipeline/configs/example-videos.json
 
-pipeline/outputs/*
-!pipeline/outputs/*/report/
-!pipeline/outputs/*/report/*
+pipeline/outputs/*/*.csv
+pipeline/outputs/*/*.pkl
+pipeline/outputs/*/*.mf
+pipeline/outputs/*/*.txt
+pipeline/outputs/*/*.json
+
+
 
