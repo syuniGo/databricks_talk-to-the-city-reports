@@ -8,7 +8,7 @@
   },
   "extraction": {
     "workers": 7,
-    "limit": 300,
+    "limit": 200,
     "prompt_file": "yahoo-news-comment"
   },
   "embedding": {
