@@ -15,7 +15,9 @@ jobs:
       - name: Print commit message
         run: |
           echo "Commit message: ${{ github.event.head_commit.message }}"
-
+          pwd
+          ls   
+    
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -63,11 +65,11 @@ jobs:
           echo "Starting deployment for report: $REPORT"
           aws s3 rm s3://${{ secrets.S3_BUCKET }}/report --recursive
           aws s3 rm s3://${{ secrets.S3_BUCKET }}/index.html
-          aws s3 cp pipeline/outputs/$REPORT/report s3://${{ secrets.S3_BUCKET }}/report --recursive
+          aws s3 cp scatter/pipeline/outputs/$REPORT/report s3://${{ secrets.S3_BUCKET }}/report --recursive
           echo '<meta http-equiv="refresh" content="0; url=/report/$REPORT.html">' > index.html
           aws s3 cp index.html s3://${{ secrets.S3_BUCKET }}/
           echo "Deployment completed successfully"
-      
+
       - name: Create deployment tag
         if: success()
         run: |
