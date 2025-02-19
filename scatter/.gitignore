@@ -12,5 +12,6 @@ pipeline/configs/*
 !pipeline/configs/example-videos.json
 
 pipeline/outputs/*
-
+!pipeline/outputs/*/report/
+!pipeline/outputs/*/report/*
 
