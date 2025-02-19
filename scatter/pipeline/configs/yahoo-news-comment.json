@@ -1,14 +1,14 @@
 {
-  "name": "Recursive Public, Agenda Setting",
-  "question": "What should be top of the agenda as humanity develops and deploys artificial intelligence?",
+  "name": "ホンダ・日産統合破談に関するコメント分析",
+  "question": "ホンダによる日産子会社化提案とその破談について、読者はどのような反応を示しているか？",
   "input": "yahoo-news-comment",
   "model": {
     "name":"gpt-4o", 
     "api_version":"2024-08-01-preview"
   },
   "extraction": {
-    "workers": 3,
-    "limit": 100,
+    "workers": 7,
+    "limit": 300,
     "prompt_file": "yahoo-news-comment"
   },
   "embedding": {
@@ -30,9 +30,9 @@
     "prompt_file": "yahoo-news-comment"
   },
   "translation": {
-    "model": "gpt-4",
+    "model": "gpt-4o",
     "languages": ["English", "Japanese"],
     "flags": ["EN", "JP"]
   },
-  "intro": "This AI-generated report relies on data from a Polis consultation run by the Recursive Public team."
+  "intro": "本Aiレポートは、ホンダによる日産子会社化提案とその破談に関する読者コメントを分析し、この企業統合案に対する公衆の反応と主要な論点を明らかにするものです。"
 }
