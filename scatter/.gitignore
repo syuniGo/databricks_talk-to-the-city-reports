@@ -6,4 +6,13 @@ __pycache__/
 pipeline/inputs/*
 
 
+pipeline/configs/*
+!pipeline/configs/example-polis.json
+!pipeline/configs/example-videos.json
 
+pipeline/outputs/*/*.csv
+pipeline/outputs/*/*.pkl
+pipeline/outputs/*/*.mf
+pipeline/outputs/*/*.txt
+pipeline/outputs/*/*
+!pipeline/outputs/*/result.json

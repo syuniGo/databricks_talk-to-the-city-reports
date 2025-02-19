@@ -1,0 +1,78 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - deploy-test
+
+jobs:
+  deploy:
+    if: startsWith(github.event.head_commit.message, 'deploy')
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Print commit message
+        run: |
+          echo "Commit message: ${{ github.event.head_commit.message }}"
+          pwd
+          ls   
+    
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Extract report name
+        id: extract_name
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          REPORT_NAME=$(echo $COMMIT_MSG | grep -oP 'report=\K[^,\s]+' || echo "yahoo-news-comment")
+          echo "report_name=$REPORT_NAME" >> $GITHUB_OUTPUT
+          echo "Using report name: $REPORT_NAME"
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'scatter/next-app/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd scatter/next-app
+          npm ci
+      
+      - name: Build
+        env:
+          REPORT: ${{ steps.extract_name.outputs.report_name }}
+        run: |
+          cd scatter/next-app
+          echo "Building report: $REPORT"
+          npm run build
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Deploy to S3
+        env:
+          REPORT: ${{ steps.extract_name.outputs.report_name }}
+        run: |
+          echo "Starting deployment for report: $REPORT"
+          aws s3 rm s3://${{ secrets.S3_BUCKET }}/report --recursive
+          aws s3 rm s3://${{ secrets.S3_BUCKET }}/index.html
+          aws s3 cp scatter/pipeline/outputs/$REPORT/report s3://${{ secrets.S3_BUCKET }}/report --recursive
+          echo '<meta http-equiv="refresh" content="0; url=/report/index.html">' > index.html
+          aws s3 cp index.html s3://${{ secrets.S3_BUCKET }}/
+          echo "Deployment completed successfully"
+
+      - name: Create deployment tag
+        if: success()
+        run: |
+          TAG_NAME="deploy-$(date +%Y%m%d-%H%M%S)"
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
