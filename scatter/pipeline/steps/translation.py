@@ -3,12 +3,11 @@ import json
 from tqdm import tqdm
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages
+from utils import messages, get_openai_chat_client
 from langchain.schema import AIMessage
 import pandas as pd
 import json
 from tqdm import tqdm
-
 
 def translation(config):
 
@@ -91,9 +90,13 @@ def translate_lang(arg_list, batch_size, prompt, lang, model):
 
 
 def translate_batch(batch, lang_prompt, model, retries=3):
-    llm = ChatOpenAI(model_name=model, temperature=0.0)
+    #llm = ChatOpenAI(model_name=model, temperature=0.0)
     input = json.dumps(list(batch))
-    response = llm(messages=messages(lang_prompt, input)).content.strip()
+    #response = llm(messages=messages(lang_prompt, input)).content.strip()
+    llm = get_openai_chat_client(model)
+    response = llm.complete(messages=messages(lang_prompt, input)).choices[0].message.content.strip()
+    print("---response---", response)
+
     if "```" in response:
         response = response.split("```")[1]
     if response.startswith("json"):

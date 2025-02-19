@@ -3,19 +3,36 @@ from datetime import datetime, timedelta
 import json
 import os
 import traceback
+from azure.ai.inference import ChatCompletionsClient
+from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.inference import EmbeddingsClient
 
 with open("./specs.json") as f:
     specs = json.load(f)
 
 
 def typed_message(t, m):
-    if t == "system":
-        return SystemMessage(content=m)
-    if t == "human":
-        return HumanMessage(content=m)
-    if t == "ai":
-        return AIMessage(content=m)
-    raise Exception("Unknown message type in prompt: " + t)
+    # if t == "system":
+    #     return SystemMessage(content=m)
+    # if t == "human":
+    #     return HumanMessage(content=m)
+    # if t == "ai":
+    #     return AIMessage(content=m)
+    # raise Exception("Unknown message type in prompt: " + t)
+    role_mapping = {
+            "system": "system",
+            "human": "user",     
+            "ai": "assistant"   
+        }
+    
+    if t not in role_mapping:
+        raise Exception("Unknown message type in prompt: " + t)
+        
+    return {
+        "role": role_mapping[t],
+        "content": m.strip()
+    }
 
 
 def messages(prompt, input):
@@ -201,8 +218,8 @@ def initialization(sysargv):
         print('So, here is what I am planning to run:')
         for step in plan:
             print(step)
-        print("Looks good? Press enter to continue or Ctrl+C to abort.")
-        input()
+        # print("Looks good? Press enter to continue or Ctrl+C to abort.")
+        # input()
 
     # ready to start!
     update_status(config, {
@@ -293,3 +310,52 @@ def termination(config, error=None):
             'error_stack_trace': traceback.format_exc()
         })
         raise error
+
+def get_openai_chat_client(model):
+    endpoint = os.getenv("endpoint")
+    credential = os.getenv("credential")
+    model_name = model["name"]
+    api_version = model["api_version"]
+    openai_chat_client = ChatCompletionsClient(
+        endpoint=f"{endpoint}/openai/deployments/{model_name}",
+        credential=AzureKeyCredential(credential),
+        api_version=f"{api_version}",
+    )
+    return openai_chat_client
+  
+def get_embeddings_client(model):
+    model_name = model["name"]
+    api_version = model["api_version"]
+    endpoint = os.getenv("endpoint")
+    credential = os.getenv("credential")
+    print('endpoint', endpoint)
+    print('credential', credential)
+    print('model_name', model_name)
+    print('api_version', api_version)
+    embeddings_client = EmbeddingsClient(
+        endpoint=f"{endpoint}/openai/deployments/{model_name}",
+        credential=AzureKeyCredential(credential),
+        api_version="2023-05-15",
+    )
+    return embeddings_client
+
+def get_azure_chat_client(model):
+    endpoint = os.getenv("endpoint")
+    credential = os.getenv("credential")
+    model_name = model["name"]
+    api_version = model["api_version"]
+    model = ChatCompletionsClient(
+        endpoint=f"{endpoint}/models/",
+        credential=AzureKeyCredential(credential),
+        model=model_name,
+    )
+    return model
+
+def extract_answer(response):
+    pattern = r'<answer>(.*?)</answer>'
+    match = re.search(pattern, response, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return response   
+  
+

@@ -5,8 +5,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
-from utils import messages, update_progress
-
+from utils import messages, update_progress, get_openai_chat_client
 
 def labelling(config):
     dataset = config['output_dir']
@@ -51,11 +50,14 @@ def labelling(config):
 
 
 def generate_label(question, args_sample, args_sample_outside, prompt, model):
-    llm = ChatOpenAI(model_name=model, temperature=0.0)
+    # llm = ChatOpenAI(model_name=model, temperature=0.0)
+    llm = get_openai_chat_client(model)
     outside = '\n * ' + '\n * '.join(args_sample_outside)
     inside = '\n * ' + '\n * '.join(args_sample)
     input = f"Question of the consultation:{question}\n\n" + \
         f"Examples of arguments OUTSIDE the cluster:\n {outside}" + \
         f"Examples of arguments INSIDE the cluster:\n {inside}"
-    response = llm(messages=messages(prompt, input)).content.strip()
+    # response = llm(messages=messages(prompt, input)).content.strip()
+    response = llm.complete(messages=messages(prompt, input)).choices[0].message.content.strip()
+    print("---response---", response)
     return response

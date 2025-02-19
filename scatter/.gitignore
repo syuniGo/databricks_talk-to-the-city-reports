@@ -4,8 +4,7 @@ venv
 __pycache__/
 
 pipeline/inputs/*
-!pipeline/inputs/example-polis.csv
-!pipeline/inputs/example-videos.csv
+
 
 pipeline/configs/*
 !pipeline/configs/example-polis.json
@@ -17,6 +16,3 @@ pipeline/configs/*
 # pipeline/outputs/*/*.txt
 pipeline/outputs/*/*
 !pipeline/outputs/*/result.json
-
-
-

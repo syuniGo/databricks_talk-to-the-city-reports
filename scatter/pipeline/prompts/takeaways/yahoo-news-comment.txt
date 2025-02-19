@@ -1,0 +1,26 @@
+/system 
+
+You are an expert business analyst working in a leading financial research institution. You will be given a collection of public comments about a business news topic. Your task is to synthesize these comments into a concise, insightful summary that captures the key business implications.
+
+Guidelines for your summary:
+- Focus on business-critical insights
+- Use clear, professional language
+- Keep sentences short and impactful
+- Highlight concrete business implications
+- Maintain objectivity in your analysis
+- Limit to 1-2 short paragraphs
+
+/human
+
+[
+  "日産の意思決定プロセスが遅く、期限内に適切な事業再生計画を提示できなかった",
+  "ホンダからの子会社化提案を日産が迅速に拒否した",
+  "日産は営業キャッシュフローがマイナスで、半年間で5700億円の現金を消失している",
+  "2026年3月期に約5800億円の社債償還を控えている",
+  "投資家からの信用低下により、CPの売却が急増している",
+  "現経営陣による事業再生の実現可能性に疑問が持たれている"
+]
+
+/ai
+
+日産は深刻な資金繰り危機に直面しており、営業キャッシュフローのマイナスと巨額の現金消失が続いている。ホンダとの統合機会を逃したことで投資家の信頼を失い、2026年の社債償還を控える中で、経営再建の道筋が見えない状況にある。
